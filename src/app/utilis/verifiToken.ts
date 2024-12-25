@@ -1,9 +1,12 @@
-import jwt from "jsonwebtoken"
+import jwt, { JwtPayload } from "jsonwebtoken"
 import config from "../config";
-import { NextFunction,Response } from "express";
-export let user = {}
-export const verifyToken = (req:any, res: Response, next: NextFunction) => {
-    const token = req.headers.authorization?.split(' ')[1];
+import { NextFunction,Response,Request} from "express";
+
+export const verifyToken = (req:Request, res: Response, next: NextFunction) => {
+    const authorizationHeader = req.headers.authorization; 
+    const token = authorizationHeader?.split(' ')[1]; 
+    
+    
 
     if (!token) {
         return res.status(401).json({
@@ -14,11 +17,8 @@ export const verifyToken = (req:any, res: Response, next: NextFunction) => {
     }
 
     try {
-        const decoded = jwt.verify(token, config.jwt_secret!) as {
-            password: string;
-            email: string;
-        };
-       user = decoded;
+        const decoded = jwt.verify(token, config.jwt_secret!) as JwtPayload;
+        req.user = decoded as JwtPayload;
       
         
         next();
